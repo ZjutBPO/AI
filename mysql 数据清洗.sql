@@ -21,7 +21,7 @@ Where LEFT(InTime,10) <> LEFT(OutTime,10)
 UPDATE total
 SET DateType = (Select type
 from workdays2020
-Where date = CONVERT ( InTime, date )
+Where date = CONVERT ( InTime, date ))
 
 
 -- 删除所属地铁线路为NULL的地铁站（60000+条）
