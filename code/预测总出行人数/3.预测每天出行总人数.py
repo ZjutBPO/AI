@@ -36,10 +36,9 @@ reframed.dropna(inplace=True)
 values = reframed.values
 print(values)
 # 取出一年的数据作为训练数据，剩下的做测试数据
-n_train_hours = -31
-# train = values[:n_train_hours, :]
-train = values
-test = values[n_train_hours:, :]
+n_train = -31
+train = values[:n_train, :]
+test = values[n_train:, :]
 train_X, train_y = train[:, :-1], train[:, -1]
 test_X, test_y = test[:, :-1], test[:, -1]
 # 将输入数据转换成3D张量 [samples, timesteps, features]，[n条数据，每条数据1个步长，8个特征值]
