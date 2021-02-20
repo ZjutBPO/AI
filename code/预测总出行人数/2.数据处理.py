@@ -21,7 +21,7 @@ print(ConfirmedCount)
 index = ConfirmedCount.idxmax()
 print(index)
 
-# 认为修正增长人数
+# 修正增长人数
 ConfirmedCount[index] = 3700
 ConfirmedCount[index+1] = 3300
 values = data.values

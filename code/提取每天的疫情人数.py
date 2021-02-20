@@ -8,6 +8,7 @@ while (date.__le__(datetime.date(2020,7,16))):
     data = pd.read_json("./COVID-19/COVID-19_{}(CN-DATA)by_DXY.json".format(date))
     data = data.sum()
     data['date'] = date
+    # 在2020.2.13之前还没有现存确诊人数这一参数
     if date.__le__(datetime.date(2020,2,13)):
         data['currentConfirmedCount'] = None
     ans = ans.append(
