@@ -30,6 +30,7 @@ pyplot.figure()
 for i in range(1,7):
 	pyplot.subplot(7, 1, i)
 	pyplot.plot(values[:, i])
+	# pyplot.scatter()
 	pyplot.title(dataset.columns[i], y=0.5, loc='right')
 
 pyplot.subplot(7, 1, 7)
