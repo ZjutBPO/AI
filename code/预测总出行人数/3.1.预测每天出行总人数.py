@@ -14,6 +14,21 @@ import pandas as pd
 pd.set_option("display.width",None)
 pd.set_option("display.max_rows",None)
 
+import keras.backend as K
+def r2(y_true, y_pred):
+    SS_reg = K.sum(K.square(y_pred - y_true))
+    mean_y = K.mean(y_true)
+    SS_tot = K.sum(K.square(y_true - mean_y))
+    f = 1 - SS_reg/SS_tot
+    return f
+
+def R2(y_true, y_pred):
+    SS_reg = sum((y_pred - y_true)**2)
+    mean_y = y_true.mean()
+    SS_tot = sum((y_true - mean_y)**2)
+    f = 1 - SS_reg/SS_tot
+    return f
+
 # load dataset
 dataset = read_csv('预测总出行人数/date-num-COVID-diff.csv')
 # 删掉那些我们不想预测的列
@@ -49,9 +64,10 @@ print(train_X.shape, train_y.shape, test_X.shape, test_y.shape)
 
 # 设计网络结构
 model = Sequential()
-model.add(LSTM(48, input_shape=(train_X.shape[1], train_X.shape[2]),name="L1"))
+model.add(LSTM(24, input_shape=(train_X.shape[1], train_X.shape[2]),name="L1"))
+model.add(Dense(8,name="D2"))
 model.add(Dense(1,name="D1"))
-model.compile(loss='mae', optimizer='adam')
+model.compile(loss='mae', optimizer='adam',metrics=[r2])
 # 拟合网络
 history = model.fit(train_X, train_y, epochs=100, batch_size=20, validation_data=(test_X, test_y), verbose=2, shuffle=False)
 model.save("预测总出行人数/testmodle.h5")
@@ -90,6 +106,8 @@ print(inv_yhat)
 # 计算预测列和真实列的误差RMSE值
 rmse = sqrt(mean_squared_error(inv_y, inv_yhat))
 print('Test RMSE: %.3f' % rmse)
+Test_R2 = R2(inv_y, inv_yhat)
+print('Test R2: %.3f' % Test_R2)
 pyplot.plot(inv_y, label='real')
 pyplot.plot(inv_yhat, label='pre')
 pyplot.legend()

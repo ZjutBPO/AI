@@ -6,7 +6,7 @@ from pandas import DataFrame
 from pandas import concat
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import LabelEncoder
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error,mean_absolute_error
 from keras.models import Sequential
 from keras.layers import Dense,LSTM,Dropout
 import pandas as pd
@@ -47,6 +47,14 @@ def series_to_supervised(data, n_in=1, n_out=1, dropnan=True):
     if dropnan:
     	agg.dropna(inplace=True)
     return agg
+
+import keras.backend as K
+def r2(y_true, y_pred):
+    SS_reg = K.sum(K.square(y_pred - y_true))
+    mean_y = K.mean(y_true)
+    SS_tot = K.sum(K.square(y_true - mean_y))
+    f = 1 - SS_reg/SS_tot
+    return f
 
 # load dataset
 dataset = read_csv('预测总出行人数/date-num-COVID-diff.csv')
@@ -94,7 +102,7 @@ model.add(Dropout(0.3))
 # model.add(Dense(128))
 model.add(Dense(16))
 model.add(Dense(1))
-model.compile(loss='mae', optimizer='adam')
+model.compile(loss='mae', optimizer='adam',metrics=['mae',r2])
 # 拟合网络
 history = model.fit(train_X, train_y, epochs=200, batch_size=train_X.shape[0], validation_data=(test_X, test_y), verbose=2, shuffle=False)
 model.save("预测总出行人数/testmodle.h5")
@@ -132,7 +140,9 @@ print(inv_y)
 print(inv_yhat)
 # 计算预测列和真实列的误差RMSE值
 rmse = sqrt(mean_squared_error(inv_y, inv_yhat))
+# mae = mean_absolute_error(inv_y, inv_yhat)
 print('Test RMSE: %.3f' % rmse)
+# print('Test MAE: %.3f' % mae)
 pyplot.plot(inv_y, label='real')
 pyplot.plot(inv_yhat, label='pre')
 pyplot.legend()
