@@ -87,6 +87,14 @@ LSTM 的关键就是细胞状态，水平线在图上方贯穿运行。
 
 LSTM 有通过精心设计的称作为“门”的结构来去除或者增加信息到细胞状态的能力。门是一种让信息选择式通过的方法。他们包含一个 `sigmoid` 神经网络层和一个按位的乘法操作。
 
+sigmoid函数表达式如下                          
+
+![img](LSTM.assets/11959071-a6a9b86c29fe75bb.png)
+
+这就是sigmoid函数的图像
+
+![img](LSTM.assets/11959071-ed4c65e5b5fa8300.png)
+
 ![img](LSTM.assets/42741-7169541c790efd13.png)
 
 <center>Paste_Image.png</center>
