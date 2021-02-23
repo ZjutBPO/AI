@@ -288,7 +288,7 @@ cell state 是不输出的，它仅对输出 hidden state 产生影响。
 **1.return_sequences=False && return_state=False**
 
 ```
-h = LSTM(X)1
+h = LSTM(X)
 ```
 
 Keras API 中，return_sequences和return_state默认就是false。此时只会返回一个hidden state 值。如果input 数据包含多个时间步，则这个hidden state 是最后一个时间步的结果
@@ -296,7 +296,7 @@ Keras API 中，return_sequences和return_state默认就是false。此时只会�
 **2.return_sequences=True && return_state=False**
 
 ```
-LSTM(1, return_sequences=True)1
+LSTM(1, return_sequences=True)
 ```
 
 输出的hidden state 包含全部时间步的结果。
@@ -304,7 +304,7 @@ LSTM(1, return_sequences=True)1
 **3.return_sequences=False && return_state=True**
 
 ```
-lstm1, state_h, state_c = LSTM(1, return_state=True)1
+lstm1, state_h, state_c = LSTM(1, return_state=True)
 ```
 
 lstm1 和 state_h 结果都是 hidden state。在这种参数设定下，它们俩的值相同。都是最后一个时间步的 hidden state。 state_c 是最后一个时间步 cell state结果。
@@ -316,7 +316,7 @@ lstm1 和 state_h 结果都是 hidden state。在这种参数设定下，它们�
 ```
 [array([[ 0.10951342]], dtype=float32), # lstm1
  array([[ 0.10951342]], dtype=float32), # state_h
- array([[ 0.24143776]], dtype=float32)] # state_c123
+ array([[ 0.24143776]], dtype=float32)] # state_c
 ```
 
 **3.return_sequences=True && return_state=True**
