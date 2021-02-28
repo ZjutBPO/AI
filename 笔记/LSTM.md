@@ -195,6 +195,102 @@ LSTM 是我们在 RNN 中获得的重要成功。很自然地，我们也会考�
 
 参考资料：https://blog.csdn.net/qq_27586341/article/details/88239404
 
+ **目录**
+
+[1. 区别](https://blog.csdn.net/qq_27586341/article/details/88239404#1. 区别)
+
+[2. 例子](https://blog.csdn.net/qq_27586341/article/details/88239404#t0)
+
+[3. 疑问解答](https://blog.csdn.net/qq_27586341/article/details/88239404#t1)
+
+[4. 实战](https://blog.csdn.net/qq_27586341/article/details/88239404#t2)
+
+[  1. 实例1：官方的example——lstm_stateful.py](https://blog.csdn.net/qq_27586341/article/details/88239404#t3)
+
+[  2. 实例2：用Keras实现有状态LSTM——电量消费预测](https://blog.csdn.net/qq_27586341/article/details/88239404#t4)
+
+[  3. 实例3：用Keras实现有状态LSTM序列预测](https://blog.csdn.net/qq_27586341/article/details/88239404#t5) 
+
+[普通多层神经网络](https://blog.csdn.net/qq_27586341/article/details/88239404#t6)
+
+[stateless LSTM](https://blog.csdn.net/qq_27586341/article/details/88239404#t7)
+
+[单层Stateful LSTM](https://blog.csdn.net/qq_27586341/article/details/88239404#t8)
+
+[双层stacked Stateful LSTM](https://blog.csdn.net/qq_27586341/article/details/88239404#t9)
+
+------
+
+有状态的RNN，能在训练中维护跨批次的状态信息，即为当前批次的训练数据计算的状态值，可以用作下一批次训练数据的初始隐藏状态。因为Keras RNN默认是无状态的，这需要显示设置。stateful代表除了每个样本内的时间步内传递，而且每个样本之间会有信息(c,h)传递，而stateless指的只是样本内的信息传递。
+
+### 参考目录：
+
+- [官方文档](https://keras.io/zh/getting-started/faq/#how-can-i-use-stateful-rnns)
+- [Stateful LSTM in Keras](https://link.jianshu.com/?t=http%3A%2F%2Fphilipperemy.github.io%2Fkeras-stateful-lstm%2F) （必读圣经）
+- [案例灵感来自此GitHub](https://link.jianshu.com/?t=https%3A%2F%2Fgithub.com%2Fsachinruk%2FPyData_Keras_Talk)
+- [Stateful and Stateless LSTM for Time Series Forecasting with Python](https://link.jianshu.com/?t=https%3A%2F%2Fmachinelearningmastery.com%2Fstateful-stateless-lstm-time-series-forecasting-python%2F) 
+- [时间序列数据生成器（TimeseriesGenerator）](https://www.jianshu.com/p/4466f64007fd)
+- [深度学习之路（一）：用LSTM网络做时间序列数据预测](https://www.jianshu.com/p/6b874e49b906)
+
+------
+
+### 1. 区别
+
+- **stateful LSTM**：
+
+​    能让模型学习到你输入的samples之间的时序特征，适合一些长序列的预测，哪个sample在前，哪个sample在后对模型是有影响的。
+
+​    优点：更小的网络，或更少的训练时间。
+
+​    缺点：需要使用反应数据周期性的批大小来训练网络，并在每个训练批后重置状态。
+
+- **stateless LSTM：**
+
+​    输入samples后，默认就会shuffle，可以说是每个sample独立，之间无前后关系，适合输入一些没有关系的样本。
+
+------
+
+### 2. 例子
+
+1. stateful LSTM：我想根据一篇1000句的文章预测第1001句，每一句是一个sample。我会选用stateful，因为这文章里的1000句是有前后关联的，是有时序的特征的，我不想丢弃这个特征。利用这个时序性能让第一句的特征传递到我们预测的第1001句。（batch_size = 10时）
+2. stateless LSTM：我想训练LSTM自动写诗句，我想训练1000首诗，每一首是一个sample，我会选用stateless LSTM，因为这1000首诗是独立的，不存在关联，哪怕打乱它们的顺序，对于模型训练来说也没区别。
+
+**当使用有状态 RNN 时，假定：**
+
+1. 所有的批次都有相同数量的样本
+2. 如果 x1 和 x2 是连续批次的样本，则x2[i]是 x1[i] 的后续序列，对于每个i。
+
+**要在 RNN 中使用状态，需要:**
+
+1. 通过将 batch_size 参数传递给模型的第一层来显式指定你正在使用的批大小。例如，对于 10 个时间步长的 32 样本的 batch，每个时间步长具有 16 个特征，batch_size = 32。
+2. 在 RNN 层中设置 stateful = True。
+3. 在调用 fit() 时指定 shuffle = False。
+
+**重置累积状态：**
+
+1. 使用 model.reset_states()来重置模型中所有层的状态
+
+2. 使用layer.reset_states()来重置指定有状态 RNN 层的状态
+
+   ------
+
+    
+
+### 3. 疑问解答
+
+1. **将一个很长的序列（例如时间序列）分成小序列来构建我的输入矩阵。那LSTM网络会发现我这些小序列之间的关联依赖吗？**
+        不会，除非你使用 stateful LSTM 。大多数问题使用stateless LSTM即可解决，所以如果你想使用stateful LSTM，请确保自己是真的需要它。在stateless时，长期记忆网络并不意味着你的LSTM将记住之前batch的内容。
+2. **在Keras中stateless LSTM中的stateless指的是?**
+        注意，此文所说的stateful是指的在Keras中特有的，是batch之间的记忆cell状态传递。而非说的是LSTM论文模型中表示那些记忆门，遗忘门，c，h等等在同一sequence中不同timesteps时间步之间的状态传递。
+        假定我们的输入X是一个三维矩阵，shape = （nb_samples, timesteps, input_dim），每一个row代表一个sample，每个sample都是一个sequence小序列。X[i]表示输入矩阵中第i个sample。步长啥的我们先不用管。
+        当我们在默认状态stateless下，Keras会在训练每个sequence小序列（=sample）开始时，将LSTM网络中的记忆状态参数reset初始化（指的是c，h而并非权重w），即调用model.reset_states()。
+3. **为啥stateless LSTM每次训练都要初始化记忆参数?**
+        因为Keras在训练时会默认地shuffle samples，所以导致sequence之间的依赖性消失，sample和sample之间就没有时序关系，顺序被打乱，这时记忆参数在batch、小序列之间进行传递就没意义了，所以Keras要把记忆参数初始化。
+4. **那stateful LSTM到底怎么传递记忆参数？**
+        首先要明确一点，LSTM作为有记忆的网络，它的有记忆指的是在一个sequence中，记忆在不同的timesteps中传播。举个例子，就是你有一篇文章X，分解，然后把每个句子作为一个sample训练对象（sequence），X[i]就代表一句话，而一句话里的每个word各自代表一个timestep时间步，LSTM的有记忆即指的是在一句话里，X[i][0]第一个单词（时间步）的信息可以被记忆，传递到第5个单词（时间步）X[i][5]中。
+        而我们突然觉得，这还远远不够，因为句子和句子之间没有任何的记忆啊，假设文章一共1000句话，我们想预测出第1001句是什么，不想丢弃前1000句里的一些时序性特征（stateless时这1000句训练时会被打乱，时序性特征丢失）。那么，stateful LSTM就可以做到。
+        在stateful = True 时，我们要在fit中手动使得shuffle = False。随后，在X[i]（表示输入矩阵中第i个sample）这个小序列训练完之后，Keras会将将训练完的记忆参数传递给X[i+bs]（表示第i+bs个sample）,作为其初始的记忆参数。bs = batch_size。这样一来，我们的记忆参数就能顺利地在sample和sample之间传递，X[i+n*bs]也能知道X[i]的信息
+
 ## LSTM中的batch_size到底是什么
 
 参考资料：https://blog.csdn.net/ch206265/article/details/107088040/
@@ -354,3 +450,101 @@ state_c 则表示最后一个时间步的 cell state
 # LSTM函数的各个参数的含义
 
 参考原文：https://blog.csdn.net/sinat_35576477/article/details/91340437
+
+```python
+# -*- coding: UTF-8 -*-
+
+# 这份文件的作用是作为一个示例，记录关于 LSTM 函数的各个参数的含义
+
+import tensorflow as tf
+import numpy as np
+
+# 这里建立一个简单的模型演示 LSTM 层的特性
+model = tf.keras.models.Sequential()
+
+model.add(tf.keras.layers.LSTM(
+    # 这里是作为Sequential模型的第一层所以指定input_shape参数，后面加的层不需要这个
+    # 这里的input_shape是两个元素的，第一个代表每个输入的样本序列长度，第二个元素代表
+    # 每个序列里面的1个元素具有多少个输入数据。例如，LSTM处理的序列长度为10，每个时间
+    # 步即序列的元素是由两个维度组成，那么这个参数设置为(10, 2)
+    input_shape = (10, 2),
+    # unit 决定了一层里面 LSTM 单元的数量。这些单元是并列的，一个时间步骤里，输入这个
+    # 层的信号，会被所有 unit 同时并行处理，形成若 unit 个输出。所以官方文档说，这个
+    # unit 参数是这一层输出的维度。如果说上面的input_shape是(10, 2)的话，设个设置为
+    # units = 3，那么这一层的输出一般就是(10, 3)，如果返回的h（输出序列）是所有的h
+    # 的话。
+    units = 3,
+    # 激活函数的类型，默认是没有激活函数。这个激活函数决定了每个 unit 每一次计算的输出
+    # 范围。如果要模拟原论文的话，应该设置activation = "tanh"。
+    activation = "tanh",
+    # recurrent activation是作用于 C 的计算，要模拟原文的话需要设置为sigmoid
+    recurrent_activation = "sigmoid",
+    # 是否增加一个偏置向量。模拟原文的话设置为 True。
+    use_bias = True,
+    # 用来初始化内核权重矩阵，用于对输入进行线性转换
+    kernel_initializer = "glorot_uniform",
+    # 回归计算的内核权重矩阵初始化方法，用于给回归状态进行线性转换 orthogonal 是默认
+    # 的值
+    recurrent_initializer = "orthogonal",
+    # 给偏置进行初始化操作的方法，默认值是 zeros
+    bias_initializer = "zeros",
+    # 如果设置为 True 会给遗忘门增加一个 bias 参数，同时强制设置bias_initializer为
+    # zeros
+    unit_forget_bias = True,
+    # 内核权重归一化的方法，默认为 None
+    kernel_regularizer = None,
+    # 回归权重矩阵归一化方法，默认None
+    recurrent_regularizer = None,
+    # 用于偏置矩阵的归一化方法，默认None
+    bias_regularizer = None,
+    # 给 LSTM 输出的归一化方法，默认None
+    activity_regularizer = None,
+    # 用于内核参数矩阵的约束函数，默认None
+    kernel_constraint = None,
+    # 回归参数矩阵的约束函数，默认None
+    recurrent_constraint = None,
+    # 偏置参数矩阵的约束函数，默认为None
+    bias_constraint = None,
+    # 使多少比重的神经元输出（unit的输出）激活失效，默认为0，模仿原文为0
+    dropout = 0.0,
+    # recurrent_dropout是给递归状态 C 设置的Dropout参数
+    recurrent_dropout = 0.0,
+    # 实现方式。1会将运算分解为若干小矩阵的乘法加法运算，2则相反。这个参数不用情况下
+    # 会使得程序具有不同的性能表现。
+    implementation = 1,
+    # return_sequences 是否返回全部输出的序列。False否，True返回全部输出，框架默认
+    # False，模拟原文可以考虑设置为True
+    return_sequences = True,
+    # 是否返回LSTM的中间状态，框架默认False，模拟原文可以设置为False。这里返回的状态
+    # 是最后计算后的状态
+    return_state = False,
+    # 是否反向处理。设置为诶True则反向处理输入序列以及返回反向的输出。默认为False
+    go_backwards = False,
+    # 默认为False，如果设置为True，每一个批的索引i代表的样本的最后一个状态量C，将会作
+    # 为初始化状态，初始化下一个索引i的批次样本
+    stateful = False,
+    # 是否展开。把LSTM展开计算会加速回归计算的过程，但是会占用更多内存，建议在小序列上
+    # 展开。默认为False。
+    unroll = False
+))
+
+# 打印调试信息
+model.summary()
+
+# 输入批次，包含所有样本，这里就一个样本
+input_data_all = [
+    # 样本内有10个元素，对应输入序列有10个元素，每个元素里面包含两个子元素，对应每个
+    # 时间步 LSTM 单元处理两个输入数据。这个是跟上面构造模型时的input_shape一致的。
+    [[1,2],[3,4],[5,6],[7,8],[9,10],[11,12],[13,14],[15,16],[17,18],[19,20]]
+]
+
+# 运行上面的模型，得到计算结果
+output_data_all = model.predict(np.array(input_data_all, dtype=np.float64))
+
+# 上面的输入只有一个样本，所以输出也只有一个样本，由于指定返回所有输出序列，也就是
+# return_sequences = True, 所以这里返回的output_data_all[0]包含了10个元素，对应
+# 输入序列10个元素的每个的计算结果，每个结果又是具有3个元素的，对应了上面设置units=3
+# 的每个 LSTM unit 的计算输出结果。
+print(output_data_all)
+```
+
