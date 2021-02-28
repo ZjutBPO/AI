@@ -9,7 +9,7 @@ pd.set_option('display.max_rows',None)     #设置行不限制数量
 total = pd.read_csv("data/total2-covid.csv")
 user = pd.read_csv("用户画像/Personas.csv")
 
-username="0006366a03e947e45df7082b8546afb7"
+username="fbfb4bca808ff01b77da7706eabf781d"
 usertrips = total.loc[total["UserID"] == username]
 # usertrips["InTime"] = usertrips["InTime"].map(lambda item:item[11:13])
 usertrips = usertrips.sort_values(by = "InTime")
