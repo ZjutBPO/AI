@@ -960,3 +960,34 @@ import h5py
 ```
 
 如果模块导入没有错误，那么说明模块已经安装成功，否则你可以在 http://docs.h5py.org/en/latest/build.html 中找到详细的安装说明。
+
+# scikit-learn用train_test_split随机划分数据集和训练集
+
+train_test_split()函数是用来随机划分样本数据为训练集和测试集的，当然也可以人为的切片划分。
+
+优点：随机客观的划分数据，减少人为因素
+
+完整模板：
+
+train_X,test_X,train_y,test_y = train_test_split(train_data,train_target,test_size=0.3,random_state=5)
+
+参数解释：
+
+train_data：待划分样本数据
+
+train_target：待划分样本数据的结果（标签）
+
+test_size：测试数据占样本数据的比例，若整数则样本数量
+
+random_state：设置随机数种子，保证每次都是同一个随机数。若为0或不填，则每次得到数据都不一样
+
+```python
+from sklearn.model_selection import train_test_split
+train_X,test_X,train_y,test_y = train_test_split(X,y,test_size=0.3,random_state=17)
+```
+
+
+
+————————————————
+版权声明：本文为CSDN博主「不论如何未来很美好」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/qq_36523839/article/details/80280771
