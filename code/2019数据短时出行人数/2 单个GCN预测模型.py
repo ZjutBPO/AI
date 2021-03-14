@@ -69,16 +69,16 @@ train_X,test_X,train_Map,test_Map,train_y,test_y = train_test_split(RidershipLis
 
 X_in = Input(shape=(MapSize,1))
 Map_in = Input(shape=(MapSize,MapSize))
-gcn1 = GraphConv(128,activation="relu")([X_in,Map_in])
-gcn2 = GraphConv(128,activation="relu")([gcn1,Map_in])
+gcn1 = GraphConv(4,activation="relu")([X_in,Map_in])
+gcn2 = GraphConv(4,activation="relu")([gcn1,Map_in])
 OutPut = Flatten()(gcn2)
-OutPut = Dense(MapSize)(OutPut)
+OutPut = Dense(MapSize,activation="relu")(OutPut)
 OutPut = Dense(1)(OutPut)
 
 model = Model(inputs = [X_in,Map_in],output = OutPut)
 model.compile(loss='mse', optimizer=Adam(lr=0.01),metrics=[r2])
 
-history = model.fit([train_X,train_Map],train_y,batch_size=train_X.shape[0], epochs=100, shuffle=False, verbose=1,validation_split=0.2)
+history = model.fit([train_X,train_Map],train_y,batch_size=train_X.shape[0], epochs=300, shuffle=False, verbose=1,validation_split=0.2)
 
 model.summary()
 from keras.utils import plot_model
@@ -111,6 +111,12 @@ print('Test MAE: %.3f' % mae)
 print('Test R2: %.3f' % r2)
 print('Test explained_variance_score: %.3f' % score)
 print('Test MAPE: %.3f' % mape)
+
+# print('%.3f' % rmse)
+# print('%.3f' % mae)
+# print('%.3f' % r2)
+# print('%.3f' % score)
+# print('%.3f' % mape)
 
 pyplot.plot(output, label='real')
 pyplot.plot(test_y, label='pre')

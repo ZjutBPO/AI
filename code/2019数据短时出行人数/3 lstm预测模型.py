@@ -125,19 +125,20 @@ test_X = test_X.reshape((test_X.shape[0], n_hours, n_features))
 print(train_x.shape, train_y.shape, test_X.shape, test_y.shape)
 
 model = Sequential()
-model.add(LSTM(256, activation="relu",input_shape=(train_x.shape[1], train_x.shape[2]),return_sequences=True))
-model.add(LSTM(256, activation="relu"))
+model.add(LSTM(64, activation="relu",input_shape=(train_x.shape[1], train_x.shape[2]),return_sequences=True))
+model.add(LSTM(64, activation="relu"))
 model.add(Dropout(0.3))
 model.add(Dense(16))
 model.add(Dense(1))
 model.compile(loss='mae', optimizer='adam',metrics=[r2])
 
+# 拟合网络
+history = model.fit(train_x, train_y, epochs=400, batch_size=train_x.shape[0], validation_split=0.2, verbose=2, shuffle=False)
+
 model.summary()
 from keras.utils import plot_model
 plot_model(model,to_file="lstm预测模型.png",show_shapes=True)
 
-# 拟合网络
-history = model.fit(train_x, train_y, epochs=200, batch_size=train_x.shape[0], validation_split=0.2, verbose=2, shuffle=False)
 # 图像展示训练损失
 pyplot.plot(history.history['loss'], label='train')
 pyplot.plot(history.history['val_loss'], label='validation')
@@ -165,6 +166,12 @@ print('Test MAE: %.3f' % mae)
 print('Test R2: %.3f' % r2)
 print('Test explained_variance_score: %.3f' % score)
 print('Test MAPE: %.3f' % mape)
+
+# print('%.3f' % rmse)
+# print('%.3f' % mae)
+# print('%.3f' % r2)
+# print('%.3f' % score)
+# print('%.3f' % mape)
 
 pyplot.plot(output, label='real')
 pyplot.plot(test_y, label='pre')

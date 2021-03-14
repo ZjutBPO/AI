@@ -8,7 +8,7 @@ from keras.regularizers import l2
 import scipy
 from sklearn.preprocessing import MinMaxScaler
 import numpy as np
-from keras_gcn import GraphConv
+from keras_gcn import *
 from keras import backend
 from matplotlib import pyplot
 from sklearn.model_selection import train_test_split
@@ -63,17 +63,17 @@ for i in range(TimeStep):
     RidershipList[i] = RidershipList[i].reshape(RidershipList[i].shape[0],RidershipList[i].shape[1],1)
     print(RidershipList[i].shape)
 
-train_X_3,test_X_3,train_X_2,test_X_2,train_X_1,test_X_1,train_Map,test_Map,train_y,test_y = train_test_split(RidershipList[0],RidershipList[1],RidershipList[2],LocalMap,TrueValue,test_size = 0.1,random_state = 5)
+train_X_3,test_X_3,train_X_2,test_X_2,train_X_1,test_X_1,train_Map,test_Map,train_y,test_y = train_test_split(RidershipList[0],RidershipList[1],RidershipList[2],LocalMap,TrueValue,test_size = 0.1,random_state = 0)
 
 train_X = [train_X_3,train_X_2,train_X_1,train_Map,train_Map,train_Map]
 test_X = [test_X_3,test_X_2,test_X_1,train_Map,train_Map,train_Map]
 
 X_in = Input(shape=(MapSize,1),name = "StationFeature")
 Map_in = Input(shape=(MapSize,MapSize),name = "Map")
-GCN1 = GraphConv(128,activation="relu",name="GCN1")([X_in,Map_in])
-GCN2 = GraphConv(128,activation="relu",name="GCN2")([GCN1,Map_in])
+GCN1 = GraphConv(4,activation="relu",name="GCN1")([X_in,Map_in])
+GCN2 = GraphConv(4,activation="relu",name="GCN2")([GCN1,Map_in])
 Output = Flatten()(GCN2)
-Output = Dense(256,name="ExtractFeature")(Output)
+Output = Dense(64,name="ExtractFeature")(Output)
 
 GCN_Model = Model(inputs = [X_in,Map_in],output = Output,name = "GCN_Part")
 plot_model(GCN_Model,to_file="GCN+LSTM预测(GCN部分).png",show_shapes=True)
@@ -97,7 +97,7 @@ model = Model(inputs = Inputs + Map_Input,output = Predict,name = "GCN+LSTM")
 
 BatchSize = train_X_3.shape[0]
 model.compile(loss='mse', optimizer=Adam(lr=0.01),metrics=[r2])
-history = model.fit(train_X,train_y,batch_size=BatchSize, epochs=150, shuffle=False, verbose=1,validation_split=0.2)
+history = model.fit(train_X,train_y,batch_size=BatchSize, epochs=300, shuffle=False, verbose=1,validation_split=0.2)
 
 GCN_Model.summary()
 model.summary()
@@ -125,11 +125,17 @@ def MAPE(true, pred):
 
 mape = MAPE(output,test_y)
 
-print('Test RMSE: %.3f' % rmse)
-print('Test MAE: %.3f' % mae)
-print('Test R2: %.3f' % r2)
-print('Test explained_variance_score: %.3f' % score)
-print('Test MAPE: %.3f' % mape)
+# print('Test RMSE: %.3f' % rmse)
+# print('Test MAE: %.3f' % mae)
+# print('Test R2: %.3f' % r2)
+# print('Test explained_variance_score: %.3f' % score)
+# print('Test MAPE: %.3f' % mape)
+
+print('%.3f' % rmse)
+print('%.3f' % mae)
+print('%.3f' % r2)
+print('%.3f' % score)
+print('%.3f' % mape)
 
 pyplot.plot(output, label='real')
 pyplot.plot(test_y, label='pre')
