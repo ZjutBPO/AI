@@ -63,33 +63,52 @@ for i in range(TimeStep):
     RidershipList[i] = RidershipList[i].reshape(RidershipList[i].shape[0],RidershipList[i].shape[1],1)
     print(RidershipList[i].shape)
 
-train_X,test_X,train_Map,test_Map,train_y,test_y = train_test_split(RidershipList[2],LocalMap,TrueValue,test_size = 0.1,random_state = 5)
-# split = 96
-# train_X,test_X,train_Map,test_Map,train_y,test_y = []
+train_X_3,test_X_3,train_X_2,test_X_2,train_X_1,test_X_1,train_Map,test_Map,train_y,test_y = train_test_split(RidershipList[0],RidershipList[1],RidershipList[2],LocalMap,TrueValue,test_size = 0.1,random_state = 5)
 
-X_in = Input(shape=(MapSize,1))
-Map_in = Input(shape=(MapSize,MapSize))
-gcn1 = GraphConv(128,activation="relu")([X_in,Map_in])
-gcn2 = GraphConv(128,activation="relu")([gcn1,Map_in])
-OutPut = Flatten()(gcn2)
-OutPut = Dense(MapSize)(OutPut)
-OutPut = Dense(1)(OutPut)
+train_X = [train_X_3,train_X_2,train_X_1,train_Map,train_Map,train_Map]
+test_X = [test_X_3,test_X_2,test_X_1,train_Map,train_Map,train_Map]
 
-model = Model(inputs = [X_in,Map_in],output = OutPut)
+X_in = Input(shape=(MapSize,1),name = "StationFeature")
+Map_in = Input(shape=(MapSize,MapSize),name = "Map")
+GCN1 = GraphConv(128,activation="relu",name="GCN1")([X_in,Map_in])
+GCN2 = GraphConv(128,activation="relu",name="GCN2")([GCN1,Map_in])
+Output = Flatten()(GCN2)
+Output = Dense(256,name="ExtractFeature")(Output)
+
+GCN_Model = Model(inputs = [X_in,Map_in],output = Output,name = "GCN_Part")
+plot_model(GCN_Model,to_file="GCN+LSTM预测(GCN部分).png",show_shapes=True)
+
+Inputs = []
+Map_Input = []
+GCN_Models = []
+
+for i in range(TimeStep):
+    Inputs.append(Input(shape=(MapSize,1),name = "StationFeature_t-{}".format(TimeStep - i)))
+    Map_Input.append(Input(shape=(MapSize,MapSize),name = "Map_t-{}".format(TimeStep - i)))
+    GCN_Models.append(GCN_Model([Inputs[i],Map_Input[i]]))
+
+MergeLayres = concatenate([GCN_Models[i] for i in range(TimeStep)])
+LSTM_Input = Reshape((TimeStep,-1))(MergeLayres)
+LSTM1 = LSTM(64,activation="relu",return_sequences=True,name = "LSTM1")(LSTM_Input)
+LSTM2 = LSTM(64,activation="relu",name="LSTM2")(LSTM1)
+Predict = Dense(1,name="Predict")(LSTM2)
+
+model = Model(inputs = Inputs + Map_Input,output = Predict,name = "GCN+LSTM")
+
+BatchSize = train_X_3.shape[0]
 model.compile(loss='mse', optimizer=Adam(lr=0.01),metrics=[r2])
+history = model.fit(train_X,train_y,batch_size=BatchSize, epochs=150, shuffle=False, verbose=1,validation_split=0.2)
 
-history = model.fit([train_X,train_Map],train_y,batch_size=train_X.shape[0], epochs=100, shuffle=False, verbose=1,validation_split=0.2)
-
+GCN_Model.summary()
 model.summary()
-from keras.utils import plot_model
-plot_model(model,to_file="单个GCN预测模型.png",show_shapes=True)
+plot_model(model,to_file="GCN+LSTM预测(整体).png",show_shapes=True)
 
 pyplot.plot(history.history['loss'], label='train')
 pyplot.plot(history.history['val_loss'], label='validation')
 pyplot.legend()
 pyplot.show()
 
-output = model.predict([test_X,test_Map])
+output = model.predict(test_X)
 # print(output)
 
 output = TrueValueScaler.inverse_transform(output)
