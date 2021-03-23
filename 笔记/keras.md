@@ -991,3 +991,24 @@ train_X,test_X,train_y,test_y = train_test_split(X,y,test_size=0.3,random_state=
 ————————————————
 版权声明：本文为CSDN博主「不论如何未来很美好」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
 原文链接：https://blog.csdn.net/qq_36523839/article/details/80280771
+
+# Save Model: TypeError
+
+https://blog.csdn.net/Funkdub/article/details/100069905
+
+环境：win10，keras-2.2.4，tensorflow-1.13.1，python3.6
+
+使用keras训练时 保存模型的时候报错，解决方案比较扯淡- -貌似是一个不愿意解决的bug
+
+这个需改keras的源码，具体的改正方法见github的issues9342 https://github.com/keras-team/keras/issues/9342
+
+```python
+from tensorflow.python.framework.tensor_shape import Dimension
+if type(obj) == Dimension:
+  return int(obj.value or 0)
+```
+
+在keras的源码路径下tensorflow/python/keras/_impl/keras/engine/saving.py中的get_json_type中按如上方法修改即可避免报错。
+————————————————
+版权声明：本文为CSDN博主「NeuralNifeK」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/Funkdub/article/details/100069905

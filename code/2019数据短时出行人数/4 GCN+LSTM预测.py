@@ -70,8 +70,8 @@ test_X = [test_X_3,test_X_2,test_X_1,train_Map,train_Map,train_Map]
 
 X_in = Input(shape=(MapSize,1),name = "StationFeature")
 Map_in = Input(shape=(MapSize,MapSize),name = "Map")
-GCN1 = GraphConv(4,activation="relu",name="GCN1")([X_in,Map_in])
-GCN2 = GraphConv(4,activation="relu",name="GCN2")([GCN1,Map_in])
+GCN1 = GraphConv(4,name="GCN1")([X_in,Map_in])
+GCN2 = GraphConv(4,name="GCN2")([GCN1,Map_in])
 Output = Flatten()(GCN2)
 Output = Dense(64,name="ExtractFeature")(Output)
 
