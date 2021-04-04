@@ -61,5 +61,5 @@ def forcast():
 
     predictions = json.loads(res.text)
     PredictiveValue = Y_scaler.inverse_transform(predictions["predictions"])[0][0]
-    
+
     return {"PredictiveValue":PredictiveValue}

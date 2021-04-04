@@ -22,12 +22,17 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    from . import LSTM_forcast
+    # from flaskr.LSTM_forcast import LSTM_forcast
+    import LSTM_forcast
     app.register_blueprint(LSTM_forcast.bp)
 
     return app
 
 if __name__ == '__main__':
+    print(1)
     app = create_app()
-    app.run(host="0.0.0.0", port="5000", processes=16, threaded=False,debug=False)
+    print(2)
+                                         
+    app.run(host="0.0.0.0", port="5000", processes=True, threaded=True,debug=False)
+    print(3)
  
