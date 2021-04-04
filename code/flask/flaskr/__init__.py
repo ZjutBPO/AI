@@ -22,12 +22,12 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    from . import forcast_15
-    app.register_blueprint(forcast_15.bp)
+    from . import LSTM_forcast
+    app.register_blueprint(LSTM_forcast.bp)
 
     return app
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(host="0.0.0.0", port="5000", processes=8, threaded=False)
+    app.run(host="0.0.0.0", port="5000", processes=16, threaded=False,debug=False)
  
