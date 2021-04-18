@@ -16,6 +16,7 @@ from sklearn.metrics import *
 from math import *
 import keras.backend as K
 import time
+import joblib
 
 def r2(y_true, y_pred):
     SS_reg = K.sum(K.square(y_pred - y_true))
@@ -53,6 +54,9 @@ Ridership = Ridership.reshape(-1,TimeStep,Ridership.shape[-1])
 
 TrueValueScaler = MinMaxScaler(feature_range=(0, 1))
 TrueValue = TrueValueScaler.fit_transform(TrueValue)
+
+joblib.dump(RidershipScaler, 'Station{}_RidershipScaler'.format(Station))
+joblib.dump(TrueValueScaler, 'Station{}_TrueValueScaler'.format(Station))
 
 LocalMap = np.expand_dims(LocalMap,axis=0)
 LocalMap = np.repeat(LocalMap,TrueValue.shape[0],axis=0)

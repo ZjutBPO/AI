@@ -131,19 +131,23 @@ print(train_X.shape, train_y.shape, test_X.shape, test_y.shape)
 
 # 设计网络结构
 model = Sequential()
-model.add(LSTM(256, activation="relu",input_shape=(train_X.shape[1], train_X.shape[2]),return_sequences=True))
+model.add(LSTM(300, activation="relu",input_shape=(train_X.shape[1], train_X.shape[2]),return_sequences=True))
 # model.add(LSTM(256, activation="relu",return_sequences=True))
-model.add(Dropout(0.2))
-model.add(LSTM(256, activation="relu"))
-model.add(Dropout(0.2))
+model.add(LSTM(300, activation="relu"))
+# model.add(Dropout(0.2))
 # model.add(Dense(128))
-model.add(Dense(16))
-model.add(Dropout(0.2))
+# model.add(Dense(16))
+model.add(Dropout(0.15))
 model.add(Dense(1))
 model.compile(loss='mae', optimizer='adam',metrics=[r2])
 # 拟合网络
 history = model.fit(train_X, train_y, epochs=200, batch_size=train_X.shape[0], validation_data=(test_X, test_y), shuffle=False)
-model.save("预测总出行人数/testmodle.h5")
+# model.save("预测总出行人数/testmodle.h5")
+
+model.summary()
+from keras.utils import plot_model
+plot_model(model,to_file="预测总出行人数/lstm预测模型.png",show_shapes=True)
+
 # 图像展示训练损失
 pyplot.plot(history.history['loss'], label='train')
 pyplot.plot(history.history['val_loss'], label='test')

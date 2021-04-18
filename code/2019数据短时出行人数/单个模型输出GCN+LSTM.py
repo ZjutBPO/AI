@@ -216,6 +216,7 @@ train_X_3,test_X_3,train_X_2,test_X_2,train_X_1,test_X_1,train_Map,test_Map,trai
 train_X = [train_X_3,train_X_2,train_X_1,train_Map,train_Map,train_Map]
 test_X = [test_X_3,test_X_2,test_X_1,train_Map,train_Map,train_Map]
 
+# 模型部分-GCN
 X_in = Input(shape=(MapSize,1),name = "StationFeature")
 Map_in = Input(shape=(MapSize,MapSize),name = "Map")
 GCN1 = GraphConv(4,name="GCN1")([X_in,Map_in])
@@ -224,8 +225,9 @@ Output = Flatten()(GCN2)
 Output = Dense(100,name="ExtractFeature")(Output)
 
 GCN_Model = Model(inputs = [X_in,Map_in],output = Output,name = "GCN_Part")
-# plot_model(GCN_Model,to_file="GCN+LSTM预测(GCN部分.png",show_shapes=True)
+plot_model(GCN_Model,to_file="GCN+LSTM预测(GCN部分.png",show_shapes=True)
 
+# LSTM部分
 Inputs = []
 Map_Input = []
 GCN_Models = []
@@ -249,7 +251,7 @@ history = model.fit(train_X,train_y,batch_size=BatchSize, epochs=300, shuffle=Fa
 
 GCN_Model.summary()
 model.summary()
-# plot_model(model,to_file="GCN+LSTM预测(整体).png",show_shapes=True)
+plot_model(model,to_file="GCN+LSTM预测(整体).png",show_shapes=True)
 tensorboard_callback = TensorBoard('./keras')
 tensorboard_callback.set_model(model)
 tensorboard_callback.writer.flush()
@@ -258,10 +260,10 @@ tensorboard_callback.writer.flush()
 pyplot.plot(history.history['loss'], label='train')
 pyplot.plot(history.history['val_loss'], label='validation')
 pyplot.legend()
-# pyplot.show()
+pyplot.show()
 
 output = model.predict(test_X)
-# print(output)
+print(output)
 
 output = TrueValueScaler.inverse_transform(output)
 test_y = TrueValueScaler.inverse_transform(test_y)
@@ -283,15 +285,9 @@ print('Test R2: %.3f' % r2)
 print('Test explained_variance_score: %.3f' % score)
 print('Test MAPE: %.3f' % mape)
 
-# print('%.3f' % rmse)
-# print('%.3f' % mae)
-# print('%.3f' % r2)
-# print('%.3f' % score)
-# print('%.3f' % mape)
-
 pyplot.plot(output, label='real')
 pyplot.plot(test_y, label='pre')
 pyplot.legend()
-# pyplot.show()
-# model.save("{}-minute forecast/Station{}.h5".format(TimeInterval,Station))
+pyplot.show()
+model.save("{}-minute forecast/Station{}.h5".format(TimeInterval,Station))
 print(time.time() - st)

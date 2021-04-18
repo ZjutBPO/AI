@@ -1,4 +1,4 @@
-#公式
+# 公式
 
 参考资料：面向数据驱动的城市轨道交通短时客流预测模型_梁强升.pdf
 
@@ -6,7 +6,18 @@
 
 对于图G的拉普拉斯矩阵L定义为$L=D-A$，对称归一化的拉普拉斯矩阵为$L=D^{-\frac{1}{2}}AD^{-\frac{1}{2}}$。
 
-拉普拉斯矩阵其谱分解为$L=U \Lambda U^{-1}$，其中$U=[u_1,\cdots,u_n]$ ，$\Lambda = diag([\lambda_1,\cdots,\lambda_1])$。对于一个输入$x \in R^n$在图中的傅里叶变化定义为$\hat{x} = U^Tx$，其傅里叶逆变化定义为$x = U\hat{x}$。这样，$x$与卷积核$g_\theta$进行卷积就可以写成$g_\theta*x = Ug_\theta U^Tx,g_\theta=diag([\theta_0,\cdots,\theta_{n-1}])$。
+拉普拉斯矩阵其谱分解为$L=U \Lambda U^{-1}$，其中$U=[u_1,\cdots,u_n]$ ，$\Lambda = diag([\lambda_1,\cdots,\lambda_n])$。对于一个输入$x \in R^n$在图中的傅里叶变化定义为$\hat{x} = U^Tx$，其傅里叶逆变化定义为$x = U\hat{x}$。这样，$x$与卷积核$g_\theta$进行卷积就可以写成$g_\theta*x = Ug_\theta U^Tx,g_\theta=diag([\theta_0,\cdots,\theta_{n-1}])$。
+
+由于$g_\theta$的计算复杂度非常高，Kipf等人引入了一种近似ChebNet，将卷积公式近似为
+$$
+g_\theta=\theta_0x-\theta_1D^{-\frac{1}{2}}AD^{-\frac{1}{2}}x
+$$
+为了防止过拟合，假设$\theta = \theta_0 = -\theta_1$，图卷积的定义就近似为
+
+$g_\theta*x=\theta(I_n-D^{-\frac{1}{2}}AD^{-\frac{1}{2}})x=\theta(\hat{D}^{-\frac{1}{2}}\hat{A}\hat{D}^{-\frac{1}{2}})x$
+
+其中$\hat{A}=A+I_n$和$\hat{D}_{ii} = \sum_j\hat{W}_{ij}$重新归一化得到的，即图上加上自环。在加上一个激活函数，就可以得到论文的快速卷积公式：
+$H^{(l+1)=\sigma(\hat{D}^{-\frac{1}{2}}\hat{A}\hat{D}^{-\frac{1}{2}}H^lW^l)}$
 
 # 图（Graph）上的热传播模型
 
