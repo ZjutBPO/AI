@@ -194,13 +194,13 @@ print(LocalMap.shape)
 Ridership = Ridership.reshape(-1,Ridership.shape[-1])
 RidershipScaler = MinMaxScaler(feature_range=(0, 1))
 Ridership = RidershipScaler.fit_transform(Ridership)
-joblib.dump(RidershipScaler, 'Station{}_RidershipScaler'.format(Station))
+joblib.dump(RidershipScaler, 'temp/Station{}_RidershipScaler'.format(Station))
 
 Ridership = Ridership.reshape(-1,TimeStep,Ridership.shape[-1])
 
 TrueValueScaler = MinMaxScaler(feature_range=(0, 1))
 TrueValue = TrueValueScaler.fit_transform(TrueValue)
-joblib.dump(TrueValueScaler, 'Station{}_TrueValueScaler'.format(Station))
+joblib.dump(TrueValueScaler, 'temp/Station{}_TrueValueScaler'.format(Station))
 
 LocalMap = np.expand_dims(LocalMap,axis=0)
 LocalMap = np.repeat(LocalMap,TrueValue.shape[0],axis=0)
@@ -225,7 +225,7 @@ Output = Flatten()(GCN2)
 Output = Dense(100,name="ExtractFeature")(Output)
 
 GCN_Model = Model(inputs = [X_in,Map_in],output = Output,name = "GCN_Part")
-plot_model(GCN_Model,to_file="GCN+LSTM预测(GCN部分.png",show_shapes=True)
+plot_model(GCN_Model,to_file="temp/GCN+LSTM预测(GCN部分.png",show_shapes=True)
 
 # LSTM部分
 Inputs = []
@@ -251,7 +251,7 @@ history = model.fit(train_X,train_y,batch_size=BatchSize, epochs=300, shuffle=Fa
 
 GCN_Model.summary()
 model.summary()
-plot_model(model,to_file="GCN+LSTM预测(整体).png",show_shapes=True)
+plot_model(model,to_file="temp/GCN+LSTM预测(整体).png",show_shapes=True)
 tensorboard_callback = TensorBoard('./keras')
 tensorboard_callback.set_model(model)
 tensorboard_callback.writer.flush()
@@ -289,5 +289,5 @@ pyplot.plot(output, label='real')
 pyplot.plot(test_y, label='pre')
 pyplot.legend()
 pyplot.show()
-model.save("{}-minute forecast/Station{}.h5".format(TimeInterval,Station))
+model.save("temp/Station{}.h5".format(TimeInterval,Station))
 print(time.time() - st)
